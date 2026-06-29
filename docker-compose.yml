@@ -1,0 +1,29 @@
+version: "3.9"
+
+services:
+  api:
+    build: .
+    ports:
+      - "8000:8000"
+    environment:
+      - ANTHROPIC_API_KEY=${ANTHROPIC_API_KEY}
+      - CLAUDE_MODEL=claude-sonnet-4-6
+      - VECTOR_STORE_PATH=/app/data/vector_store
+      - DOCS_PATH=/app/docs
+      - TOP_K=5
+      - CHUNK_SIZE=512
+      - CHUNK_OVERLAP=64
+      - MAX_TOKENS=1024
+      - TEMPERATURE=0.3
+    volumes:
+      - vector_store:/app/data/vector_store
+      - ./docs:/app/docs:ro
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8000/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+volumes:
+  vector_store:
