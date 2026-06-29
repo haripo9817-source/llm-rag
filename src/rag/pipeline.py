@@ -3,13 +3,11 @@ RAG Pipeline - Document ingestion, chunking, embedding, and retrieval.
 Uses FAISS for vector store and sentence-transformers for embeddings.
 """
 
-import os
-import json
-import pickle
 import hashlib
-from pathlib import Path
-from typing import List, Dict, Optional, Tuple
+import pickle
 from dataclasses import dataclass, field
+from pathlib import Path
+from typing import Dict, List, Optional, Tuple
 
 import faiss
 import numpy as np
@@ -75,12 +73,11 @@ class VectorStore:
         faiss.normalize_L2(embeddings)
         self.index.add(embeddings)
         for text, meta in zip(texts, metadata):
-            self.chunks.append(RetrievedChunk(
-                content=text,
-                metadata=meta,
-                score=0.0,
-                doc_id=meta.get("doc_id", "")
-            ))
+            self.chunks.append(
+                RetrievedChunk(
+                    content=text, metadata=meta, score=0.0, doc_id=meta.get("doc_id", "")
+                )
+            )
 
     def search(self, query_embedding: np.ndarray, top_k: int = 5) -> List[RetrievedChunk]:
         if self.index.ntotal == 0:
@@ -92,12 +89,14 @@ class VectorStore:
         for score, idx in zip(scores[0], indices[0]):
             if idx >= 0:
                 chunk = self.chunks[idx]
-                results.append(RetrievedChunk(
-                    content=chunk.content,
-                    metadata=chunk.metadata,
-                    score=float(score),
-                    doc_id=chunk.doc_id
-                ))
+                results.append(
+                    RetrievedChunk(
+                        content=chunk.content,
+                        metadata=chunk.metadata,
+                        score=float(score),
+                        doc_id=chunk.doc_id,
+                    )
+                )
         return results
 
     def save(self, path: str):
@@ -150,12 +149,14 @@ class RAGPipeline:
             chunks = self.splitter.split(doc.content)
             for i, chunk in enumerate(chunks):
                 all_texts.append(chunk)
-                all_meta.append({
-                    **doc.metadata,
-                    "doc_id": doc.doc_id,
-                    "chunk_index": i,
-                    "total_chunks": len(chunks),
-                })
+                all_meta.append(
+                    {
+                        **doc.metadata,
+                        "doc_id": doc.doc_id,
+                        "chunk_index": i,
+                        "total_chunks": len(chunks),
+                    }
+                )
 
         if not all_texts:
             return 0

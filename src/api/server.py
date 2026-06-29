@@ -10,18 +10,17 @@ Endpoints:
 
 import os
 import time
-from typing import List, Optional
 from contextlib import asynccontextmanager
+from typing import List, Optional
 
 from fastapi import FastAPI, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import StreamingResponse
 from pydantic import BaseModel
 
-from src.rag.pipeline import RAGPipeline, Document
-from src.rag.loaders import load_from_strings, load_directory
 from src.api.claude_client import ClaudeRAGClient
-
+from src.rag.loaders import load_directory, load_from_strings
+from src.rag.pipeline import RAGPipeline
 
 # ── Startup / Shutdown ────────────────────────────────────────────────────────
 
@@ -70,6 +69,7 @@ app.add_middleware(
 
 # ── Request / Response Models ─────────────────────────────────────────────────
 
+
 class IngestRequest(BaseModel):
     texts: List[str]
     source: str = "api"
@@ -87,6 +87,7 @@ class ChatResponse(BaseModel):
 
 
 # ── Endpoints ─────────────────────────────────────────────────────────────────
+
 
 @app.get("/health")
 def health():
@@ -136,6 +137,7 @@ def chat_stream(req: ChatRequest):
 
     def generate():
         import json
+
         # First emit sources as metadata event
         yield f"data: {json.dumps({'type': 'sources', 'sources': sources})}\n\n"
         # Stream answer tokens

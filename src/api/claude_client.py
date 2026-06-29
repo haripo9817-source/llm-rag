@@ -3,11 +3,11 @@ Claude LLM client — RAG-aware chat with streaming support.
 """
 
 import os
-from typing import List, Dict, Iterator, Optional
+from typing import Dict, Iterator, List, Optional
+
 import anthropic
 
 from src.rag.pipeline import RetrievedChunk
-
 
 SYSTEM_PROMPT = """You are a helpful assistant that answers questions based on the provided context documents.
 

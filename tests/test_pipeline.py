@@ -3,17 +3,16 @@ Test suite for RAG pipeline.
 Run: pytest tests/ -v
 """
 
-import pytest
-import numpy as np
 from unittest.mock import MagicMock, patch
 
-from src.rag.pipeline import (
-    Document, TextSplitter, VectorStore, RAGPipeline, RetrievedChunk
-)
-from src.rag.loaders import load_from_strings
+import numpy as np
+import pytest
 
+from src.rag.loaders import load_from_strings
+from src.rag.pipeline import Document, RAGPipeline, RetrievedChunk, TextSplitter, VectorStore
 
 # ── TextSplitter ──────────────────────────────────────────────────────────────
+
 
 class TestTextSplitter:
     def test_short_text_not_split(self):
@@ -45,6 +44,7 @@ class TestTextSplitter:
 
 # ── Document ──────────────────────────────────────────────────────────────────
 
+
 class TestDocument:
     def test_doc_id_auto_generated(self):
         doc = Document(content="hello")
@@ -62,6 +62,7 @@ class TestDocument:
 
 
 # ── VectorStore ───────────────────────────────────────────────────────────────
+
 
 class TestVectorStore:
     def test_add_and_search(self):
@@ -101,6 +102,7 @@ class TestVectorStore:
 
 # ── Loaders ───────────────────────────────────────────────────────────────────
 
+
 class TestLoaders:
     def test_load_from_strings(self):
         docs = load_from_strings(["Hello", "World"], source="test")
@@ -110,6 +112,7 @@ class TestLoaders:
 
     def test_load_text_file(self, tmp_path):
         from src.rag.loaders import load_text_file
+
         f = tmp_path / "sample.txt"
         f.write_text("Sample content for testing.")
         doc = load_text_file(str(f))
@@ -118,7 +121,9 @@ class TestLoaders:
 
     def test_load_json_file_list(self, tmp_path):
         import json
+
         from src.rag.loaders import load_json_file
+
         data = [{"content": "Item 1"}, {"content": "Item 2"}]
         f = tmp_path / "data.json"
         f.write_text(json.dumps(data))
@@ -127,6 +132,7 @@ class TestLoaders:
 
     def test_load_directory(self, tmp_path):
         from src.rag.loaders import load_directory
+
         (tmp_path / "a.txt").write_text("File A content")
         (tmp_path / "b.txt").write_text("File B content")
         (tmp_path / "skip.pdf").write_text("ignored")
@@ -135,6 +141,7 @@ class TestLoaders:
 
 
 # ── RAGPipeline (mocked embedder) ─────────────────────────────────────────────
+
 
 class TestRAGPipeline:
     @pytest.fixture
@@ -145,7 +152,9 @@ class TestRAGPipeline:
             mock_st.get_sentence_embedding_dimension.return_value = 16
             mock_st.encode.return_value = np.random.rand(5, 16).astype(np.float32)
             MockST.return_value = mock_st
-            p = RAGPipeline(chunk_size=100, chunk_overlap=10, top_k=3, store_path=str(tmp_path / "store"))
+            p = RAGPipeline(
+                chunk_size=100, chunk_overlap=10, top_k=3, store_path=str(tmp_path / "store")
+            )
             return p
 
     def test_ingest_returns_chunk_count(self, pipeline):
@@ -156,7 +165,9 @@ class TestRAGPipeline:
 
     def test_build_context_format(self, pipeline):
         chunks = [
-            RetrievedChunk(content="chunk text", metadata={"source": "s1"}, score=0.9, doc_id="abc"),
+            RetrievedChunk(
+                content="chunk text", metadata={"source": "s1"}, score=0.9, doc_id="abc"
+            ),
         ]
         ctx = pipeline.build_context(chunks)
         assert "[Source 1: s1]" in ctx

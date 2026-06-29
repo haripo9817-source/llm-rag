@@ -6,14 +6,14 @@ import json
 import re
 from pathlib import Path
 from typing import List, Optional
+
 from .pipeline import Document
 
 
 def load_text_file(path: str, source_name: Optional[str] = None) -> Document:
     content = Path(path).read_text(encoding="utf-8")
     return Document(
-        content=content,
-        metadata={"source": source_name or Path(path).name, "type": "text"}
+        content=content, metadata={"source": source_name or Path(path).name, "type": "text"}
     )
 
 
@@ -23,10 +23,14 @@ def load_json_file(path: str, content_key: str = "content") -> List[Document]:
         docs = []
         for item in data:
             text = item.get(content_key) or item.get("text") or json.dumps(item)
-            docs.append(Document(
-                content=text,
-                metadata={k: v for k, v in item.items() if k != content_key and isinstance(v, str)}
-            ))
+            docs.append(
+                Document(
+                    content=text,
+                    metadata={
+                        k: v for k, v in item.items() if k != content_key and isinstance(v, str)
+                    },
+                )
+            )
         return docs
     else:
         return [Document(content=json.dumps(data, indent=2), metadata={"source": path})]
@@ -42,7 +46,7 @@ def load_markdown_file(path: str) -> Document:
     clean = re.sub(r"\[([^\]]+)\]\([^)]+\)", r"\1", clean)
     return Document(
         content=clean.strip(),
-        metadata={"source": Path(path).name, "type": "markdown", "raw_path": path}
+        metadata={"source": Path(path).name, "type": "markdown", "raw_path": path},
     )
 
 
@@ -67,4 +71,6 @@ def load_directory(directory: str, extensions: List[str] = None) -> List[Documen
 
 def load_from_strings(texts: List[str], source: str = "inline") -> List[Document]:
     """Create documents directly from strings (useful for testing)."""
-    return [Document(content=t, metadata={"source": source, "index": i}) for i, t in enumerate(texts)]
+    return [
+        Document(content=t, metadata={"source": source, "index": i}) for i, t in enumerate(texts)
+    ]
